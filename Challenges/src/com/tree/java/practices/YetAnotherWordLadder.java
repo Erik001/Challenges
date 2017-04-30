@@ -14,19 +14,11 @@ public class YetAnotherWordLadder {
 	public static boolean found;
 
 	public static void main(String[] args) {
-		String beginWord = "kiss";
-		String endWord = "tusk";
-		String wordList[] = { "miss", 
-				 "dusk", 
-				 "kiss", 
-				 "musk", 
-				 "tusk", 
-				 "diss", 
-				 "disk", 
-				 "sang", 
-				 "ties", 
-				 "muss" };
-		// int shortestTrans = 0;
+		String beginWord = "a";
+		String endWord = "c";
+		// String wordList[] = { "miss", "dusk", "kiss", "musk", "tusk", "diss",
+		// "disk", "sang", "ties", "muss" };
+		String wordList[] = { "a", "b", "c" };
 		System.out.println(new YetAnotherWordLadder().wordLadder(beginWord, endWord, wordList));
 
 	}
@@ -37,64 +29,57 @@ public class YetAnotherWordLadder {
 		if (beginWord.length() != endWord.length() || !wordsArrayList.contains(endWord)) {
 			return shortestTrans;
 		}
-
 		Queue<List<String>> transList = new LinkedList<>();
-		Stack<List<List<String>>> levels = new Stack();
+		Stack<List<List<String>>> levels = new Stack<>();
 		Map<Integer, List<String>> mapOfDiffs = null;
 		transList.add(new LinkedList<>(Arrays.asList(beginWord)));
 		int levelId = 0;
+		levels.add(new ArrayList(transList.peek()));
 		while (!transList.isEmpty()) {
-			List<List<String>> level = new ArrayList<>(transList.size());
-			levels.add(level);
+			List<String> wordsArrayListTemp = null;
+			List<List<String>> level = new ArrayList<>();
 			++levelId;
-			List<List<String>> headEleemnt = levels.lastElement();
-			List<List<String>> toAdd = null;
+			System.out.printf("Level %d: \n", levelId);
+			System.out.println("-------------------------");
+			System.out.println(levels.lastElement());
+			System.out.println("-------------------------");
+			if (found)
+				return levels.size();
+			levels.add(level);
 			for (List<String> strList : transList) {
-				level.add(strList);
-				System.out.printf("Level %d: ", levelId);
-				System.out.println(levels);
-				if (found)
-					return levels.size();
-				List<List<String>> singleLevelList = new ArrayList<>(strList.size());
-				for (String str : new ArrayList<>(strList)) {
-					if (str.equals(beginWord))
-						mapOfDiffs = getDiffsMap(str, wordsArrayList);
-					else {
-						mapOfDiffs = getDiffsMap(str, wordsArrayList);
-					}
-
-					if (mapOfDiffs.get(1) != null && mapOfDiffs.get(1).size() > 0) {
-						singleLevelList.add(mapOfDiffs.get(1));
-						if (mapOfDiffs.get(1).contains(endWord)) {
-							System.out.println("Found you!!");
-							found = true;
-							break;
-						}
-					} else {
+				wordsArrayListTemp = new ArrayList<>(wordsArrayList);
+				wordsArrayListTemp.removeAll(strList);
+				String str = strList.get(strList.size() - 1);
+				mapOfDiffs = getDiffsMap(str, wordsArrayListTemp);
+				if (mapOfDiffs.get(1) != null && mapOfDiffs.get(1).size() > 0) {
+					if (mapOfDiffs.get(1).contains(endWord)) {
+						List<String> singleLevelElement = new ArrayList<>(strList);
+						singleLevelElement.add(endWord);
+						level.add(singleLevelElement);
+						System.out.println("Found you!!");
+						found = true;
 						break;
 					}
-				}				
-				toAdd = singleLevelList;
-				wordsArrayList = getRemainingStrings(wordsArrayList, transList.peek());
-				transList.poll();
-
+					for (String st : mapOfDiffs.get(1)) {
+						List<String> singleLevelElement = new ArrayList<>(strList);
+						singleLevelElement.add(st);
+						level.add(singleLevelElement);
+					}
+				} else {
+					break;
+				}
 			}
-			transList.addAll(toAdd);
-			List<String> toRemove = new ArrayList<>();
+			transList.poll();
+			transList.addAll(level);
 
 		}
+
 		return shortestTrans;
 
 	}
 
-	private List<String> getRemainingStrings(List<String> wordList, List<String> list) {
-		wordList.removeAll(list);
-		Collections.sort(wordList);
-		return wordList;
-	}
-
 	private Map<Integer, List<String>> getDiffsMap(String beginWord, List<String> wordList) {
-		List listOfStrings = null;
+		List<String> listOfStrings = null;
 		Map<Integer, List<String>> mapOfDiffs = new HashMap<>();
 		for (String temWord : wordList) {
 			int diffs = numDiffBtwnStrings(beginWord, temWord);
